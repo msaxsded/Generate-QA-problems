@@ -12,7 +12,7 @@ import altair as alt
 import streamlit as st
 from io import StringIO
 from llama_index import Document
-from langchain.llms import Anthropic
+from langchain.llms import Anthropic,OpenAI
 from langchain.chains import RetrievalQA
 from langchain.vectorstores import FAISS
 from llama_index import LangchainEmbedding
@@ -380,11 +380,14 @@ with st.sidebar.form("user_input"):
 
 # App
 st.header("`Auto-evaluator`")
+openai_api_key=st.sidebar.text_input('OpenAI API Key',type='password')
 st.info(
     "`I am an evaluation tool for question-answering. Given documents, I will auto-generate a question-answer eval "
     "set and evaluate using the selected chain settings. Experiments with different configurations are logged. "
     "Optionally, provide your own eval set (as a JSON, see docs/karpathy-pod-eval.json for an example).`")
-
+def generate_response(input_text):
+    llm = OpenAI(temperature=0.7, openai_api_key=openai_api_key)
+    st.info(llm(input_text))
 with st.form(key='file_inputs'):
     uploaded_file = st.file_uploader("`Please upload a file to evaluate (.txt or .pdf):` ",
                                      type=['pdf', 'txt'],
@@ -395,7 +398,10 @@ with st.form(key='file_inputs'):
                                          accept_multiple_files=False)
 
     submitted = st.form_submit_button("Submit files")
-
+    if not openai_api_key.startswith('sk-'):
+        st.warning('Please enter your OpenAI API key!', icon='⚠')
+    if submitted and openai_api_key.startswith('sk-'):
+        generate_response(text)
 if uploaded_file:
 
     # Load docs
