@@ -379,29 +379,48 @@ with st.sidebar.form("user_input"):
     submitted = st.form_submit_button("Submit evaluation")
 
 # App
-st.header("`Auto-evaluator`")
-openai_api_key=st.sidebar.text_input('OpenAI API Key',type='password')
-st.info(
-    "`I am an evaluation tool for question-answering. Given documents, I will auto-generate a question-answer eval "
-    "set and evaluate using the selected chain settings. Experiments with different configurations are logged. "
-    "Optionally, provide your own eval set (as a JSON, see docs/karpathy-pod-eval.json for an example).`")
-def generate_response(input_text):
-    llm = OpenAI(temperature=0.7, openai_api_key=openai_api_key)
-    st.info(llm(input_text))
-with st.form(key='file_inputs'):
-    uploaded_file = st.file_uploader("`Please upload a file to evaluate (.txt or .pdf):` ",
-                                     type=['pdf', 'txt'],
-                                     accept_multiple_files=True)
 
-    uploaded_eval_set = st.file_uploader("`[Optional] Please upload eval set (.json):` ",
-                                         type=['json'],
-                                         accept_multiple_files=False)
-
-    submitted = st.form_submit_button("Submit files")
-    if not openai_api_key.startswith('sk-'):
-        st.warning('Please enter your OpenAI API key!', icon='⚠')
-    if submitted and openai_api_key.startswith('sk-'):
-        generate_response(uploaded_file)
+st.header("`Auto-evaluator`")  
+openai_api_key = st.sidebar.text_input('OpenAI API Key', type='password')  
+  
+st.info(  
+    "`I am an evaluation tool for question-answering. Given documents, I will auto-generate a question-answer eval "  
+    "set and evaluate using the selected chain settings. Experiments with different configurations are logged. "  
+    "Optionally, provide your own eval set (as a JSON, see docs/karpathy-pod-eval.json for an example).`")  
+  
+def generate_response(input_text):  
+    llm = OpenAI(temperature=0.7, openai_api_key=openai_api_key)  
+    try:  
+        response = llm(input_text)  
+        return response  
+    except Exception as e:  
+        st.error(f"An error occurred: {e}")  
+        return None  
+  
+with st.form(key='file_inputs'):  
+    uploaded_file = st.file_uploader("`Please upload a file to evaluate (.txt or .pdf):` ",  
+                                     type=['pdf', 'txt'],  
+                                     accept_multiple_files=True)  
+      
+    uploaded_eval_set = st.file_uploader("`[Optional] Please upload eval set (.json):` ",  
+                                         type=['json'],  
+                                         accept_multiple_files=False)  
+      
+    submitted = st.form_submit_button("Submit files")  
+    if submitted:  
+        if not openai_api_key.startswith('sk-'):  
+            st.warning('Please enter a valid OpenAI API key!', icon='⚠')  
+        else:  
+            if uploaded_file:  
+                # TODO: Add code here to process the uploaded file and generate a response.  
+                st.info("Processing your file...")  
+                # Simulate some processing time.  
+                time.sleep(3)  
+                response = generate_response("Some input text based on the uploaded file.")  
+                if response:  
+                    st.success(f"Response from OpenAI: {response}")  
+            else:  
+                st.info("No file uploaded.")
 if uploaded_file:
 
     # Load docs
