@@ -398,7 +398,10 @@ with st.form(key='file_inputs'):
                                          accept_multiple_files=False)
 
     submitted = st.form_submit_button("Submit files")
-
+    if not openai_api_key.startswith('sk-'):
+        st.warning('Please enter your OpenAI API key!', icon='⚠')
+    if submitted and openai_api_key.startswith('sk-'):
+        generate_response(uploaded_file)
 if uploaded_file:
 
     # Load docs
